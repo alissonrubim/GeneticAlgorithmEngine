@@ -3,52 +3,52 @@
 ********************************************************/
 GAEngine.Thread = new Object();
 GAEngine.Thread.Thread = function (args) {
-    var private = {}, public = this;
+    var NPrivate = {}, NPublic = this;
 
-    public.OnLoop = null;
-    public.Params = null;
-    public.Delay = 0;
+    NPublic.OnLoop = null;
+    NPublic.Params = null;
+    NPublic.Delay = 0;
 
-    private.isAlive = false;
-    private.isPaused = false;
-    private.interval = null;
+    NPrivate.isAlive = false;
+    NPrivate.isPaused = false;
+    NPrivate.interval = null;
 
-    public.Constructor = function (args) {
-        public.OnLoop = args.OnLoop;
-        public.Params = args.Params;
-        public.Delay = args.Delay || public.Delay; 
-        return public;
+    NPublic.Constructor = function (args) {
+        NPublic.OnLoop = args.OnLoop;
+        NPublic.Params = args.Params;
+        NPublic.Delay = args.Delay || NPublic.Delay; 
+        return NPublic;
     }
 
-    public.Start = function(){
-        private.isAlive = true;
-        private.isPaused = false;
+    NPublic.Start = function(){
+        NPrivate.isAlive = true;
+        NPrivate.isPaused = false;
 
         var _tick = function(){
-            if(private.isAlive){
-                if(private.isPaused){
-                    private.interval = setTimeout(_tick, 1);
+            if(NPrivate.isAlive){
+                if(NPrivate.isPaused){
+                    NPrivate.interval = setTimeout(_tick, 1);
                 }else{
-                    public.OnLoop();
-                    private.interval = setTimeout(_tick, public.Delay);
+                    NPublic.OnLoop();
+                    NPrivate.interval = setTimeout(_tick, NPublic.Delay);
                 }
             }
         }
 
-        private.interval = setTimeout(_tick, 0);
+        NPrivate.interval = setTimeout(_tick, 0);
     }
 
-    public.Stop = function(){
-        private.isAlive = false;
+    NPublic.Stop = function(){
+        NPrivate.isAlive = false;
     }
 
-    public.Pause = function(){
-        private.isPaused = true;
+    NPublic.Pause = function(){
+        NPrivate.isPaused = true;
     }
 
-    public.Continue = function(){
-        private.isPaused = false;
+    NPublic.Continue = function(){
+        NPrivate.isPaused = false;
     }
 
-    return public.Constructor(args);
+    return NPublic.Constructor(args);
 };

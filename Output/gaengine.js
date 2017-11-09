@@ -21,23 +21,23 @@ GAEngine.Log.Debug = false;
     Controller Classes
 ********************************************************/
 GAEngine.Generation = function(args){
-    var private = {}, public = this;
+    var NPrivate = {}, NPublic = this;
 
-    private.mainThread = null; 
-    private.currentIndex = 0;
+    NPrivate.mainThread = null; 
+    NPrivate.currentIndex = 0;
 
-    public.Delay = 0;  
-    public.Debug = 0;
-    public.FitnessTarget = 0;
-    public.MaximumIndexToGiveUp = 0;
-    public.Events = {
+    NPublic.Delay = 0;  
+    NPublic.Debug = 0;
+    NPublic.FitnessTarget = 0;
+    NPublic.MaximumIndexToGiveUp = 0;
+    NPublic.Events = {
         OnCalculateFitness: false,
         OnGiveUp: false,
         OnComplete: false,
         OnStop: false
     };
 
-    public.Population = {
+    NPublic.Population = {
         SubjectsSize: 0,
         MutationProvability: 0,
         Subject: {
@@ -53,15 +53,15 @@ GAEngine.Generation = function(args){
         }
     }
 
-    public.Constructor = function (args) {
-        public.Delay = args.Delay || public.Delay;
-        public.Debug = args.Debug || public.Debug;
-        public.Events = args.Events || public.Events;
-        public.FitnessTarget = args.FitnessTarget || public.FitnessTarget;
-        public.MaximumIndexToGiveUp = args.MaximumIndexToGiveUp || public.MaximumIndexToGiveUp;
+    NPublic.Constructor = function (args) {
+        NPublic.Delay = args.Delay || NPublic.Delay;
+        NPublic.Debug = args.Debug || NPublic.Debug;
+        NPublic.Events = args.Events || NPublic.Events;
+        NPublic.FitnessTarget = args.FitnessTarget || NPublic.FitnessTarget;
+        NPublic.MaximumIndexToGiveUp = args.MaximumIndexToGiveUp || NPublic.MaximumIndexToGiveUp;
 
-        public.Population = new GAEngine.Population({
-            Generation: public,
+        NPublic.Population = new GAEngine.Population({
+            Generation: NPublic,
             SubjectsSize: args.Population.SubjectsSize,
             MutationProvability: args.Population.MutationProvability,
             Subject: {
@@ -77,88 +77,88 @@ GAEngine.Generation = function(args){
             }
         });
 
-        private.mainThread = new GAEngine.Thread.Thread({
-            OnLoop: private.threadLoop,
-            Delay: public.Delay
+        NPrivate.mainThread = new GAEngine.Thread.Thread({
+            OnLoop: NPrivate.threadLoop,
+            Delay: NPublic.Delay
         });
 
-        GAEngine.Log.Debug = public.Debug;
+        GAEngine.Log.Debug = NPublic.Debug;
 
-        return public;
+        return NPublic;
     }
 
-    public.Start = function(){
+    NPublic.Start = function(){
         //Step 01 - Inicialization
-        public.Population.GenerateRandomSubjects(public.Population.SubjectsSize);
-        private.mainThread.Start();
+        NPublic.Population.GenerateRandomSubjects(NPublic.Population.SubjectsSize);
+        NPrivate.mainThread.Start();
     }
 
-    public.Stop = function(){
+    NPublic.Stop = function(){
         GAEngine.Log.Info('The program was stoped!');
-        private.mainThread.Stop();
-        public.Events.OnStop(public);
+        NPrivate.mainThread.Stop();
+        NPublic.Events.OnStop(NPublic);
     }
 
 
-    public.GetCurrentIndex = function(){
-        return private.currentIndex;
+    NPublic.GetCurrentIndex = function(){
+        return NPrivate.currentIndex;
     }
 
 
-    private.threadLoop = function(){
+    NPrivate.threadLoop = function(){
         //Step 02 - Validadte
-        var isValid = public.Events.OnCalculateFitness(public) >= public.FitnessTarget;
+        var isValid = NPublic.Events.OnCalculateFitness(NPublic) >= NPublic.FitnessTarget;
 
-        var isMaximumIndex = private.currentIndex == public.MaximumIndexToGiveUp;
+        var isMaximumIndex = NPrivate.currentIndex == NPublic.MaximumIndexToGiveUp;
 
-        if (public.Population.Subjects.length < public.Population.SubjectsSize)
+        if (NPublic.Population.Subjects.length < NPublic.Population.SubjectsSize)
             throw "The population is smallest than the SubjectsSize configuration";
 
         if(isMaximumIndex || isValid){
             GAEngine.Log.Info("Used seed: " + GAEngine.Random.Seed);
 
-            private.mainThread.Stop();
+            NPrivate.mainThread.Stop();
 
             if (isMaximumIndex){
-                GAEngine.Log.Info('The program rechead the MaximumIndexToGiveUp, that is ' + public.MaximumIndexToGiveUp + ' generations');
-                public.Events.OnGiveUp(public);
+                GAEngine.Log.Info('The program rechead the MaximumIndexToGiveUp, that is ' + NPublic.MaximumIndexToGiveUp + ' generations');
+                NPublic.Events.OnGiveUp(NPublic);
             }
             else {
-                GAEngine.Log.Info('The program found the best generation, that is ' + private.currentIndex + ' generation');
-                public.Events.OnComplete(public);
+                GAEngine.Log.Info('The program found the best generation, that is ' + NPrivate.currentIndex + ' generation');
+                NPublic.Events.OnComplete(NPublic);
             }
         }else{
             //Start a new generation...
-            private.currentIndex++;
-            GAEngine.Log.Info('Generation ' + private.currentIndex + ' started:');
+            NPrivate.currentIndex++;
+            GAEngine.Log.Info('Generation ' + NPrivate.currentIndex + ' started:');
 
             //Step 03 - Selection
             GAEngine.Log.Info('    - Selecting subjects...');
-            public.Population.DoSelect();
+            NPublic.Population.DoSelect();
 
             //Step 04 - CrossOver
             GAEngine.Log.Info('    - Cross-over subjects...');
-            public.Population.DoCrossOver();
+            NPublic.Population.DoCrossOver();
 
             //Step 05 - Mutation
             GAEngine.Log.Info('    - Mutating subjects...');
-            public.Population.DoMutation();
+            NPublic.Population.DoMutation();
 
-            GAEngine.Log.Info('    - Generation ' + private.currentIndex + ' successfully finished.');
+            GAEngine.Log.Info('    - Generation ' + NPrivate.currentIndex + ' successfully finished.');
         }
     }
 
-    return public.Constructor(args);
+    return NPublic.Constructor(args);
 };
 
 GAEngine.Population = function(args){
-    var private = {}, public = this;
+    var NPrivate = {}, NPublic = this;
 
-    public.Generation = null;
-    public.MutationProvability = 0;
-    public.Subjects = new Array();
-    public.SubjectsSize = 0;
-    public.Subject = {
+    NPublic.Generation = null;
+    NPublic.MutationProvability = 0;
+    NPublic.Subjects = new Array();
+    NPublic.SubjectsSize = 0;
+    NPublic.Subject = {
         GenesSize: 0,
         Events: {
             OnCalculateFitness: false
@@ -170,61 +170,61 @@ GAEngine.Population = function(args){
         }
     }
 
-    public.Constructor = function (args) {
-        public.Generation = args.Generation || public.Generation;
-        public.Subject = args.Subject || public.Subject;
-        public.Subjects = args.Subjects || public.Subjects;
-        public.SubjectsSize = args.SubjectsSize || public.SubjectsSize;
-        public.MutationProvability = args.MutationProvability || public.MutationProvability;
+    NPublic.Constructor = function (args) {
+        NPublic.Generation = args.Generation || NPublic.Generation;
+        NPublic.Subject = args.Subject || NPublic.Subject;
+        NPublic.Subjects = args.Subjects || NPublic.Subjects;
+        NPublic.SubjectsSize = args.SubjectsSize || NPublic.SubjectsSize;
+        NPublic.MutationProvability = args.MutationProvability || NPublic.MutationProvability;
         
-        if(public.Generation ==  null)
+        if(NPublic.Generation ==  null)
             throw "The generation can't be null";
 
-        return public;
+        return NPublic;
     }
 
-    public.GenerateRandomSubjects = function(numberOfSubjects){
-        public.SubjectsSize = numberOfSubjects;
-        GAEngine.Array.Clear(public.Subjects);
-        for (var i = 0; i < public.SubjectsSize; i++) {
-            var subject = private.createSubject();
-            subject.GenerateRandomGenes(public.Subject.GenesSize);
-            public.Subjects.push(subject);
+    NPublic.GenerateRandomSubjects = function(numberOfSubjects){
+        NPublic.SubjectsSize = numberOfSubjects;
+        GAEngine.Array.Clear(NPublic.Subjects);
+        for (var i = 0; i < NPublic.SubjectsSize; i++) {
+            var subject = NPrivate.createSubject();
+            subject.GenerateRandomGenes(NPublic.Subject.GenesSize);
+            NPublic.Subjects.push(subject);
         }
-        GAEngine.Log.Info('Population was successfully inicializated with ' + public.Subjects.length + ' subjects.');
+        GAEngine.Log.Info('Population was successfully inicializated with ' + NPublic.Subjects.length + ' subjects.');
     }
 
-    public.DoSelect = function(){
+    NPublic.DoSelect = function(){
         var eligibleSubjects = new Array();
-        while (eligibleSubjects.length < public.Subjects.length) {
-            var subjectsFitnessSum = public.Subjects.reduce((a, b) => a + b.GetFitness() + 1, 0); //Sum all subjects fitness
+        while (eligibleSubjects.length < NPublic.Subjects.length) {
+            var subjectsFitnessSum = NPublic.Subjects.reduce((a, b) => a + b.GetFitness() + 1, 0); //Sum all subjects fitness
             var randomRoulleteNumber = GAEngine.Random.Get() * subjectsFitnessSum + 1; //Generate a random number for the roullete
 
-            for (var i = 0; i < public.Subjects.length; i++) {
-                randomRoulleteNumber -= public.Subjects[i].GetFitness();
+            for (var i = 0; i < NPublic.Subjects.length; i++) {
+                randomRoulleteNumber -= NPublic.Subjects[i].GetFitness();
                 if (randomRoulleteNumber < 1) {
-                    eligibleSubjects.push(public.Subjects[i]);
+                    eligibleSubjects.push(NPublic.Subjects[i]);
                     break;
                 }
             }
         }
 
-        public.Subjects = eligibleSubjects;
+        NPublic.Subjects = eligibleSubjects;
     }
 
-    public.DoCrossOver = function(){
-        var fatherArray = GAEngine.Array.Clone(public.Subjects);
-        var motherArray = GAEngine.Array.Shuffle(public.Subjects);
+    NPublic.DoCrossOver = function(){
+        var fatherArray = GAEngine.Array.Clone(NPublic.Subjects);
+        var motherArray = GAEngine.Array.Shuffle(NPublic.Subjects);
 
-        var subjectsSize = public.Subjects.length;
-        GAEngine.Array.Clear(public.Subjects);
+        var subjectsSize = NPublic.Subjects.length;
+        GAEngine.Array.Clear(NPublic.Subjects);
 
         //Cross-over the subjects
         for (var i = 0; i < subjectsSize; i++) {
             //Randomize an Cut Point
-            var cutPoint = parseInt(GAEngine.Random.Get() * public.Subject.GenesSize);
+            var cutPoint = parseInt(GAEngine.Random.Get() * NPublic.Subject.GenesSize);
 
-            var newSubject = private.createSubject();
+            var newSubject = NPrivate.createSubject();
             var firstArray = new Array();
             var secoundArray = new Array();
 
@@ -258,135 +258,135 @@ GAEngine.Population = function(args){
                 pushGene(a, b + cutPoint, firstArray);
             });
 
-            public.Subjects.push(newSubject);
+            NPublic.Subjects.push(newSubject);
         }
     }
 
-    public.DoMutation = function(){
-        if(public.MutationProvability > 0){
-            for (var i = 0; i < public.Subjects.length; i++) {
+    NPublic.DoMutation = function(){
+        if(NPublic.MutationProvability > 0){
+            for (var i = 0; i < NPublic.Subjects.length; i++) {
                 var rand = parseInt(GAEngine.Random.Get() * 100);
-                if (rand <= public.MutationProvability) {
-                    var mutationIntencity = parseInt(GAEngine.Random.Get() * public.Subject.GenesSize);
+                if (rand <= NPublic.MutationProvability) {
+                    var mutationIntencity = parseInt(GAEngine.Random.Get() * NPublic.Subject.GenesSize);
                     for (var j = 0; j < mutationIntencity; j++) {
-                        public.Subjects[i].CreateGene(parseInt(GAEngine.Random.Get() * public.Subject.GenesSize));
+                        NPublic.Subjects[i].CreateGene(parseInt(GAEngine.Random.Get() * NPublic.Subject.GenesSize));
                     }
                 }
             }
         }
     }
 
-    private.createSubject = function(){
+    NPrivate.createSubject = function(){
         return new GAEngine.Subject({
-            Population: public,
-            GenesSize: public.Subject.GenesSize,
+            Population: NPublic,
+            GenesSize: NPublic.Subject.GenesSize,
             Events: {
-                OnCalculateFitness: public.Subject.Events.OnCalculateFitness
+                OnCalculateFitness: NPublic.Subject.Events.OnCalculateFitness
             },
             Gene: {
                 Events: {
-                    OnCreateRandomGeneValue: public.Subject.Gene.Events.OnCreateRandomGeneValue,
+                    OnCreateRandomGeneValue: NPublic.Subject.Gene.Events.OnCreateRandomGeneValue,
                 }
             }
         });
     }
 
-    return public.Constructor(args);
+    return NPublic.Constructor(args);
 };
 
 GAEngine.Subject = function(args){
-    var private = {}, public = this;
+    var NPrivate = {}, NPublic = this;
 
-    public.Genes = new Array();
-    public.Population = null;
-    public.GenesSize = 0;
-    public.Events = {
+    NPublic.Genes = new Array();
+    NPublic.Population = null;
+    NPublic.GenesSize = 0;
+    NPublic.Events = {
         OnCalculateFitness: false
     };
-    public.Gene = {
+    NPublic.Gene = {
         Events: {
             OnCreateRandomGeneValue: false
         }
     }
 
-    private.fitness = null;
+    NPrivate.fitness = null;
 
-    public.Constructor = function (args) {
-        public.Genes = args.Genes || public.Genes;
-        public.Population = args.Population || public.Population;
-        public.GenesSize = args.GenesSize || public.GenesSize;
-        public.Events = args.Events || public.Events;
-        public.Gene = args.Gene || public.Gene;
+    NPublic.Constructor = function (args) {
+        NPublic.Genes = args.Genes || NPublic.Genes;
+        NPublic.Population = args.Population || NPublic.Population;
+        NPublic.GenesSize = args.GenesSize || NPublic.GenesSize;
+        NPublic.Events = args.Events || NPublic.Events;
+        NPublic.Gene = args.Gene || NPublic.Gene;
 
-        if(public.Population == null)
+        if(NPublic.Population == null)
             throw "The population can't be null";
 
-        return public;
+        return NPublic;
     }
 
-    public.GenerateRandomGenes = function(numberOfGenes){
-        public.GenesSize = numberOfGenes;
-        GAEngine.Array.Clear(public.Genes);
-        for (var i = 0; i < public.GenesSize; i++)
-            public.CreateGene(i);
+    NPublic.GenerateRandomGenes = function(numberOfGenes){
+        NPublic.GenesSize = numberOfGenes;
+        GAEngine.Array.Clear(NPublic.Genes);
+        for (var i = 0; i < NPublic.GenesSize; i++)
+            NPublic.CreateGene(i);
     }
 
-    public.GetFitness = function(){
-        if(private.fitness == null)
-            private.fitness = public.Events.OnCalculateFitness(public);
+    NPublic.GetFitness = function(){
+        if(NPrivate.fitness == null)
+            NPrivate.fitness = NPublic.Events.OnCalculateFitness(NPublic);
 
-        if (isNaN(private.fitness))
+        if (isNaN(NPrivate.fitness))
             throw "The Fitness is not a valid number";
 
-        if (private.fitness < 0)
+        if (NPrivate.fitness < 0)
             throw "The Fitness can't be a negative number!";
 
-        return private.fitness;
+        return NPrivate.fitness;
     }
 
-    public.CreateGene = function(index){
+    NPublic.CreateGene = function(index){
         var gene = new GAEngine.Gene({
-            Subject: public,
+            Subject: NPublic,
             Index: index,
             Events: {
-                OnCreateRandomGeneValue: public.Gene.Events.OnCreateRandomGeneValue
+                OnCreateRandomGeneValue: NPublic.Gene.Events.OnCreateRandomGeneValue
             }
         });
         gene.CreateRandomValue();
-        public.Genes[index] = gene;
+        NPublic.Genes[index] = gene;
         return gene;
     }
 
-    return public.Constructor(args);
+    return NPublic.Constructor(args);
 }
 
 GAEngine.Gene = function (args) {
-    var private = {}, public = this;
+    var NPrivate = {}, NPublic = this;
 
-    public.Value = null;
-    public.Fitness = 0;
-    public.Index = 0;
-    public.Subject = null;
-    public.Events = {
+    NPublic.Value = null;
+    NPublic.Fitness = 0;
+    NPublic.Index = 0;
+    NPublic.Subject = null;
+    NPublic.Events = {
         OnCreateRandomGeneValue: false
     }
 
-    public.Constructor = function (args) {
-        public.Value = args.Value || public.Value;
-        public.Fitness = args.Fitness || public.Fitness;
-        public.Index = args.Index || public.Index;
-        public.Events = args.Events || public.Events;
-        public.Subject = args.Subject  || public.Subject;
+    NPublic.Constructor = function (args) {
+        NPublic.Value = args.Value || NPublic.Value;
+        NPublic.Fitness = args.Fitness || NPublic.Fitness;
+        NPublic.Index = args.Index || NPublic.Index;
+        NPublic.Events = args.Events || NPublic.Events;
+        NPublic.Subject = args.Subject  || NPublic.Subject;
 
-        return public;
+        return NPublic;
     }
 
-    public.CreateRandomValue = function(){
-        public.Value = public.Events.OnCreateRandomGeneValue(public);
-        return public.Value;
+    NPublic.CreateRandomValue = function(){
+        NPublic.Value = NPublic.Events.OnCreateRandomGeneValue(NPublic);
+        return NPublic.Value;
     }
 
-    return public.Constructor(args);
+    return NPublic.Constructor(args);
 };
 
 /********************************************************
@@ -435,52 +435,52 @@ GAEngine.Random.GetBetween =  function(min, max){
 ********************************************************/
 GAEngine.Thread = new Object();
 GAEngine.Thread.Thread = function (args) {
-    var private = {}, public = this;
+    var NPrivate = {}, NPublic = this;
 
-    public.OnLoop = null;
-    public.Params = null;
-    public.Delay = 0;
+    NPublic.OnLoop = null;
+    NPublic.Params = null;
+    NPublic.Delay = 0;
 
-    private.isAlive = false;
-    private.isPaused = false;
-    private.interval = null;
+    NPrivate.isAlive = false;
+    NPrivate.isPaused = false;
+    NPrivate.interval = null;
 
-    public.Constructor = function (args) {
-        public.OnLoop = args.OnLoop;
-        public.Params = args.Params;
-        public.Delay = args.Delay || public.Delay; 
-        return public;
+    NPublic.Constructor = function (args) {
+        NPublic.OnLoop = args.OnLoop;
+        NPublic.Params = args.Params;
+        NPublic.Delay = args.Delay || NPublic.Delay; 
+        return NPublic;
     }
 
-    public.Start = function(){
-        private.isAlive = true;
-        private.isPaused = false;
+    NPublic.Start = function(){
+        NPrivate.isAlive = true;
+        NPrivate.isPaused = false;
 
         var _tick = function(){
-            if(private.isAlive){
-                if(private.isPaused){
-                    private.interval = setTimeout(_tick, 1);
+            if(NPrivate.isAlive){
+                if(NPrivate.isPaused){
+                    NPrivate.interval = setTimeout(_tick, 1);
                 }else{
-                    public.OnLoop();
-                    private.interval = setTimeout(_tick, public.Delay);
+                    NPublic.OnLoop();
+                    NPrivate.interval = setTimeout(_tick, NPublic.Delay);
                 }
             }
         }
 
-        private.interval = setTimeout(_tick, 0);
+        NPrivate.interval = setTimeout(_tick, 0);
     }
 
-    public.Stop = function(){
-        private.isAlive = false;
+    NPublic.Stop = function(){
+        NPrivate.isAlive = false;
     }
 
-    public.Pause = function(){
-        private.isPaused = true;
+    NPublic.Pause = function(){
+        NPrivate.isPaused = true;
     }
 
-    public.Continue = function(){
-        private.isPaused = false;
+    NPublic.Continue = function(){
+        NPrivate.isPaused = false;
     }
 
-    return public.Constructor(args);
+    return NPublic.Constructor(args);
 };
